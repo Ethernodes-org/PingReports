@@ -32,8 +32,10 @@ $limit = 500;
 // header('Content-Type: application/json');
 header('Content-Type: text/javascript');
 echo sprintf(
-    "%s([\n",
-    $request->get('callback', 'callback')
+    "%s([\n" .
+    "\"%s\",\n",
+    $request->get('callback', 'callback'),
+    str_replace('.', '-', $service)
 );
 
 do {
@@ -56,13 +58,15 @@ do {
         $time = strtotime($record['date']);
         echo sprintf(
             // "[Date.UTC(%d,%d,%d,%d,%d,%d),%.4f]%s\n",
-            "[Date.UTC(%d,%d,%d,%d,%d),%.4f]%s\n",
+            "[%d,%d,%d,%d,%d,\"%s\",%.3f,%.3f]%s\n",
             date('Y', $time),
             date('m', $time),
             date('d', $time),
             date('H', $time),
             date('i', $time),
             // date('s', $time),
+            $record['status'],
+            $record['connect_time'],
             $record['total_time'],
             ($index + 1) < $qty ? ',' : ''
         );

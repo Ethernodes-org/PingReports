@@ -1,66 +1,25 @@
+<?php
+foreach ($services as $service => $svc) {
+?>
+<a id="a-<?= str_replace('.', '-', $service) ?>">...</a>
+<div style="text-align: center; font-weight: bold; padding-top: 40px;">
+    <?= $service ?> ::
+    <a href="<?= $svc['cleanURL'] ?>" target="_blank"><?= $svc['url'] ?> &raquo;</a>
+</div>
+<div class="starter-template" id="container-<?= str_replace('.', '-', $service) ?>">
+</div>
+<?php
+}
+?>
+
 <script type="text/javascript">
-
 $(function () {
-    /// $.getJSON('http://www.highcharts.com/samples/data/jsonp.php?filename=usdeur.json&callback=?', function (data) {
-    $.getJSON('json.php?service=<?= rawurlencode($service) ?>&callback=?', function (data) {
-
-        $('#container').highcharts({
-            chart: {
-                zoomType: 'x'
-            },
-            title: {
-                text: 'Ping Reports'
-            },
-            subtitle: {
-                text: document.ontouchstart === undefined ?
-                        'Click and drag in the plot area to zoom in' : 'Pinch the chart to zoom in'
-            },
-            xAxis: {
-                type: 'datetime'
-            },
-            yAxis: {
-                title: {
-                    text: 'Time, sec.'
-                },
-                min: 0
-            },
-            legend: {
-                enabled: false
-            },
-            plotOptions: {
-                area: {
-                    fillColor: {
-                        linearGradient: {
-                            x1: 0,
-                            y1: 0,
-                            x2: 0,
-                            y2: 1
-                        },
-                        stops: [
-                            [0, Highcharts.getOptions().colors[0]],
-                            [1, Highcharts.Color(Highcharts.getOptions().colors[0]).setOpacity(0).get('rgba')]
-                        ]
-                    },
-                    marker: {
-                        radius: 2
-                    },
-                    lineWidth: 1,
-                    states: {
-                        hover: {
-                            lineWidth: 1
-                        }
-                    },
-                    threshold: null
-                }
-            },
-
-            series: [{
-                type: 'area',
-                name: 'Total time',
-                data: data
-            }]
-        });
-    });
+<?php
+foreach (array_keys($services) as $service) {
+?>
+    $.getJSON('json.php?service=<?= rawurlencode($service) ?>&callback=?', buildChart);
+<?php
+}
+?>
 });
-
 </script>

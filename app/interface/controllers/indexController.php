@@ -9,31 +9,39 @@ class indexController extends Controller
 {
     /**
      * Index action.
+     *
+     * @return void
      */
     public function actionIndex()
     {
-        $services = array_keys($this->getConfig()->get('services'));
-        $this->oView->set(
-            'services',
-            $services,
-            TRUE
-        );
+        require_once $this->getConfig()->get('path/root') . '/lib/http_build_url.php';
 
-        $service = $this->getRequest()->get('service', FALSE);
-        if (
-            FALSE === $service ||
-            !in_array($service, $services)
-        ) {
-            $service = reset($services);
+        $services = array(); ;
+        foreach ($this->getConfig()->get('services') as $service => $svc) {
+            $url = $svc['url'];
+            $parsed = parse_url($url);
+            if (isset($parsed['user'])) {
+                $parsed['user'] = substr($parsed['user'], 0, 2) . '*';
+            }
+            if (isset($parsed['pass'])) {
+                $parsed['pass'] = '*';
+            }
+            $url = http_build_url($parsed);
+            unset($parsed['user'], $parsed['pass']);
+            $cleanURL = http_build_url($parsed);
+            $services[$service] = array(
+                'url'      => $url,
+                'cleanURL' => $cleanURL,
+            );
         }
         $this->oView->set(
-            'service',
-            $service,
-            TRUE
+            'services',
+            $services
         );
         $this->oView->set(
-            'service',
-            $service
+            'services',
+            array_keys($services),
+            TRUE
         );
     }
 }
