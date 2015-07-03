@@ -19,7 +19,9 @@ function buildChart(data)
                     x: Date.UTC(d[0], d[1], d[2], d[3], d[4]),
                     y: d[6 + j],
                     marker: {
-                        fillColor: 'red'
+                        fillColor: 'red',
+                        symbol: 'diamond',
+                        radius: 4
                     }
                 };
             }
