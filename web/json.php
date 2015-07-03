@@ -62,15 +62,12 @@ switch ($view) {
 
             $records = $dal->get(
                 array(
+                    "`service`, " .
                     "SUBSTR(`date`, 1, 13) `date_hour`",
-                    // "SUM(1) `total`",
+                    "SUM(1) `total`",
                     "SUM(CASE (`status`) WHEN 'F' THEN 1 ELSE 0 END) `failed`",
                 ),
                 array(
-                    array(
-                        'field' => 'service',
-                        'value' => $service,
-                    ),
                     array(
                         'field' => 'date',
                         'op'    => '>=',
@@ -84,9 +81,11 @@ switch ($view) {
                 ),
                 0,
                 0,
-                "SUBSTR(`date`, 1, 13)"
+                "`service`, SUBSTR(`date`, 1, 13)"
             );
             $lastFoundRecordIndex = 0;
+            $last = FALSE;
+            $rows = array();
             for ($day = 1; $day < 32; ++$day) {
                 $date = sprintf("%s-%02d", date('Y-m', $timeFrom), $day);
                 for ($hour = 0; $hour < 24; ++$hour) {
@@ -94,23 +93,34 @@ switch ($view) {
                     if ($dateHour . ':59:59' < $borderDates['min_date']) {
                         continue;
                     }
-                    $failed = 0;
-                    if (
+                    if (!isset($rows[$dateHour])) {
+                        $rows[$dateHour] = array();
+                    }
+                    while (
                         isset($records[$lastFoundRecordIndex]) &&
                         $dateHour == $records[$lastFoundRecordIndex]['date_hour']
                     ) {
+                        $svc    = $records[$lastFoundRecordIndex]['service'];
+                        $total  = $records[$lastFoundRecordIndex]['total'];
                         $failed = $records[$lastFoundRecordIndex]['failed'];
+                        $rows[$dateHour][array_search($svc, $services)] =
+                            sprintf("%.2f", (60 - (60 - $total) - $failed) * 100 / 60);
                         ++$lastFoundRecordIndex;
                     }
-                    $percent = (60 - $failed) * 100 / 60;
+                    foreach (array_keys($services) as $index) {
+                        if (!isset($rows[$dateHour][$index])) {
+                            $rows[$dateHour][$index] = 0;
+                        }
+                    }
+
                     $last = $dateHour >= $maxDate;
                     echo sprintf(
-                        "[%d,%d,%d,%d,%.2f]%s\n",
+                        "[%d,%d,%d,%d,%s]%s\n",
                         date('Y', $timeFrom),
                         date('m', $timeFrom),
                         $day,
                         $hour,
-                        $percent,
+                        implode(',', $rows[$dateHour]),
                         $last ? '' : ','
                     );
                     if ($last) {

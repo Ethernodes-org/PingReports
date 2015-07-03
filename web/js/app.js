@@ -4,24 +4,32 @@ function buildChart(data)
         view = data[0][0],
         services = data[0][1],
         service = view == 'uptime' ? view : services,
-        series = 'uptime' == view ? [] : [[], []],
         d, record, i, j,
-        yAxis;
+        series = [], _yAxis, _series = [], highchart;
 
     for (i = 1; i < data.length; i++) {
         d = data[i];
         switch (view) {
             case 'uptime':
-                record = [
-                    Date.UTC(d[0], d[1], d[2], d[3]),
-                    d[4]
-                ];
-                series.push(record);
+                for (j = 0; j < services.length; j++) {
+                    if ('undefined' == typeof(series[j])) {
+                        series[j] = [];
+                    }
+                    record = [
+                        Date.UTC(d[0], d[1], d[2], d[3]),
+                        d[4 + j]
+                    ];
+                    series[j].push(record);
+
+                }
                 break; // case 'uptime'
 
             case 'details':
                 for (j = 0; j < 2; j++) {
-                    if (('S' == d[5]) || !j) {
+                    if ('undefined' == typeof(series[j])) {
+                        series[j] = [];
+                    }
+                    if ('S' == d[5] || !j) {
                         // Success, common point
                         record = [
                             Date.UTC(d[0], d[1], d[2], d[3], d[4]),
@@ -44,22 +52,52 @@ function buildChart(data)
                 break; // case 'details'
         }
     }
-    yAxis =
-        view == 'uptime'
-            ? {
+
+    switch (view) {
+        case 'uptime':
+            _yAxis = {
                 title: {
                     text: '%'
                 },
                 min: 0,
                 max: 100
-            } : {
+            };
+            _series = [];
+            for (j = 0; j < services.length; j++) {
+                _series[j] = {
+                    type:  'area',
+                    name:  services[j],
+                    // color: '#000',
+                    data:  series[j]
+                };
+            }
+
+            break; // case 'uptime'
+
+        case 'details':
+            _yAxis = {
                 title: {
                     text: 'Time, sec.'
                 },
                 min: 0
             };
+            _series = [{
+                type:  'area',
+                name:  'Total time',
+                color: '#000',
+                data:  series[1]
+            },
+            {
+                type: 'area',
+                name: 'Connect time',
+                data: series[0]
+            }];
 
-    $('#container-' + service).highcharts({
+            break; // case 'details'
+    }
+    console.log(_series);///
+
+    highchart = {
         chart: {
             zoomType: 'x'
         },
@@ -82,7 +120,8 @@ function buildChart(data)
         xAxis: {
             type: 'datetime'
         },
-        yAxis: yAxis,
+
+        yAxis: _yAxis,
 
         plotOptions: {
             area: {
@@ -116,24 +155,9 @@ function buildChart(data)
             crosshairs: true
         },
 
-        series:
-            'uptime' == view
-                ? [{
-                    type:  'area',
-                    name:  'Uptime, %',
-                    // color: '#000',
-                    data:  series
-                }]
-                : [{
-                    type:  'area',
-                    name:  'Total time',
-                    color: '#000',
-                    data:  series[1]
-                },
-                {
-                    type: 'area',
-                    name: 'Connect time',
-                    data: series[0]
-                }]
-    });
+        series: _series
+
+    };
+
+    $('#container-' + service).highcharts(highchart);
 }
