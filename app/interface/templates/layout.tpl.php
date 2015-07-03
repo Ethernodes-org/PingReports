@@ -10,7 +10,7 @@
     <link rel="stylesheet" href="/css/plugins.css">
     <link rel="stylesheet" href="/css/custom.css">
     <script src="/js/jquery.min.js"></script>
-    <script src="/js/app.js?v=3"></script>
+    <script src="/js/app.js?v=4"></script>
 </head>
 <body>
     <nav class="navbar navbar-inverse navbar-fixed-top">
@@ -25,6 +25,9 @@
             </div>
             <div id="navbar" class="collapse navbar-collapse">
                 <ul class="nav navbar-nav">
+                    <li class="active">
+                        <a href="#a-uptime">UPTIME</a>
+                    </li>
 <?php
 foreach($services as $service){
 ?>

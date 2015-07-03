@@ -1,3 +1,6 @@
+<a id="a-uptime"></a>
+<div class="starter-template" style="padding-top: 50px;" id="container-uptime">
+</div>
 <?php
 foreach ($services as $service => $svc) {
 ?>
@@ -14,10 +17,11 @@ foreach ($services as $service => $svc) {
 
 <script type="text/javascript">
 $(function () {
+    $.getJSON('json.php?view=uprime&callback=?', buildChart);
 <?php
 foreach (array_keys($services) as $service) {
 ?>
-    $.getJSON('json.php?view=uptime&service=<?= rawurlencode($service) ?>&callback=?', buildChart);
+    $.getJSON('json.php?view=details&service=<?= rawurlencode($service) ?>&callback=?', buildChart);
 <?php
 }
 ?>

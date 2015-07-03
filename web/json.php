@@ -34,10 +34,12 @@ $dal->init($config->get('dataAccess'));
 header('Content-Type: text/javascript');
 echo sprintf(
     "%s([\n" .
-    "[\"%s\",\"%s\"],\n",
+    "[\"%s\",%s],\n",
     $request->get('callback', 'callback'),
-    str_replace('.', '-', $service),
-    $view
+    $view,
+    $view == 'uptime'
+        ? sprintf("['%s']", implode("', '", array_map('mapService', $services)))
+        : sprintf('"%s"', mapService($service))
 );
 
 switch ($view) {
@@ -169,3 +171,8 @@ switch ($view) {
 }
 
 echo "]);\n";
+
+function mapService($service)
+{
+    return str_replace('.', '-', $service);
+}

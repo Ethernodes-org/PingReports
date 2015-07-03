@@ -1,10 +1,12 @@
 function buildChart(data)
 {
     var
-        service = data[0][0],
-        view = data[0][1],
+        view = data[0][0],
+        services = data[0][1],
+        service = view == 'uptime' ? view : services,
         series = 'uptime' == view ? [] : [[], []],
-        d, record, i, j;
+        d, record, i, j,
+        yAxis;
 
     for (i = 1; i < data.length; i++) {
         d = data[i];
@@ -42,7 +44,20 @@ function buildChart(data)
                 break; // case 'details'
         }
     }
-    console.log(series);///
+    yAxis =
+        view == 'uptime'
+            ? {
+                title: {
+                    text: '%'
+                },
+                min: 0,
+                max: 100
+            } : {
+                title: {
+                    text: 'Time, sec.'
+                },
+                min: 0
+            };
 
     $('#container-' + service).highcharts({
         chart: {
@@ -60,15 +75,14 @@ function buildChart(data)
                     : 'Pinch the chart to zoom in'
         },
 
+        legend: {
+            enabled: view != 'uptime'
+        },
+
         xAxis: {
             type: 'datetime'
         },
-        yAxis: {
-            title: {
-                text: view == 'uptime' ? '%' : 'Time, sec.'
-            },
-            min: 0
-        },
+        yAxis: yAxis,
 
         plotOptions: {
             area: {
