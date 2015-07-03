@@ -5,7 +5,8 @@ namespace AmiLabs\PingReports;
 /**
  * Data Access Layer interface.
  */
-interface IDataAccessLayer{
+interface IDataAccessLayer
+{
     /**
      * Initializes layer.
      *
@@ -27,13 +28,22 @@ interface IDataAccessLayer{
     public function store($date, $service, $status, $connectTime, $totalTime);
 
     /**
+     * Returns min/max dates.
+     *
+     * @param  string $service
+     * @return mixed
+     */
+    public function getBorderDates($service);
+
+    /**
      * Returns specified servce records.
      *
      * @param  array $aFields
      * @param  array $aFilter
      * @param  int   $start
      * @param  int   $limit
+     * @param  string $groupBy
      * @return array
      */
-    public function get(array $aFields, array $aFilter, $start, $limit);
+    public function get(array $aFields, array $aFilter, $start, $limit, $groupBy = '');
 }

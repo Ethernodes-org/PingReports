@@ -1,33 +1,48 @@
 function buildChart(data)
 {
-    var service = data[0], series = [[], []], d, record, i, j;
-
-    console.log(service, $('#container-' + service));///
-
+    var
+        service = data[0][0],
+        view = data[0][1],
+        series = 'uptime' == view ? [] : [[], []],
+        d, record, i, j;
 
     for (i = 1; i < data.length; i++) {
         d = data[i];
-        for (j = 0; j < 2; j++) {
-            if ('S' == d[5] || !j) {
-                // Success, common point
+        switch (view) {
+            case 'uptime':
                 record = [
-                    Date.UTC(d[0], d[1], d[2], d[3], d[4]),
-                    d[6 + j]
+                    Date.UTC(d[0], d[1], d[2], d[3]),
+                    d[4]
                 ];
-            } else {
-                record = {
-                    x: Date.UTC(d[0], d[1], d[2], d[3], d[4]),
-                    y: d[6 + j],
-                    marker: {
-                        fillColor: 'red',
-                        symbol: 'diamond',
-                        radius: 4
+                series.push(record);
+                break; // case 'uptime'
+
+            case 'details':
+                for (j = 0; j < 2; j++) {
+                    if ('S' == d[5] || !j) {
+                        // Success, common point
+                        record = [
+                            Date.UTC(d[0], d[1], d[2], d[3], d[4]),
+                            d[6 + j]
+                        ];
+                    } else {
+                        record = {
+                            x: Date.UTC(d[0], d[1], d[2], d[3], d[4]),
+                            y: d[6 + j],
+                            marker: {
+                                fillColor: 'red',
+                                symbol: 'diamond',
+                                radius: 4
+                            }
+                        };
                     }
-                };
-            }
-            series[j].push(record);
+                    series[j].push(record);
+                }
+
+                break; // case 'details'
         }
     }
+    console.log(series);///
 
     $('#container-' + service).highcharts({
         chart: {
@@ -35,7 +50,7 @@ function buildChart(data)
         },
 
         title: {
-            text: ''
+            text: view.toUpperCase()
         },
 
         subtitle: {
@@ -50,7 +65,7 @@ function buildChart(data)
         },
         yAxis: {
             title: {
-                text: 'Time, sec.'
+                text: view == 'uptime' ? '%' : 'Time, sec.'
             },
             min: 0
         },
@@ -87,18 +102,24 @@ function buildChart(data)
             crosshairs: true
         },
 
-        series: [
-            {
-                type:  'area',
-                name:  'Total time',
-                color: '#000',
-                data:  series[1]
-            },
-            {
-                type: 'area',
-                name: 'Connect time',
-                data: series[0]
-            }
-        ]
+        series:
+            'uptime' == view
+                ? [{
+                    type:  'area',
+                    name:  'Uptime, %',
+                    // color: '#000',
+                    data:  series
+                }]
+                : [{
+                    type:  'area',
+                    name:  'Total time',
+                    color: '#000',
+                    data:  series[1]
+                },
+                {
+                    type: 'area',
+                    name: 'Connect time',
+                    data: series[0]
+                }]
     });
 }

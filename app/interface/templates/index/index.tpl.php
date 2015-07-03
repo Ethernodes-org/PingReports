@@ -17,7 +17,7 @@ $(function () {
 <?php
 foreach (array_keys($services) as $service) {
 ?>
-    $.getJSON('json.php?service=<?= rawurlencode($service) ?>&callback=?', buildChart);
+    $.getJSON('json.php?view=uptime&service=<?= rawurlencode($service) ?>&callback=?', buildChart);
 <?php
 }
 ?>
