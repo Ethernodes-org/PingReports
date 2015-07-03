@@ -27,7 +27,8 @@ class Composer{
         @chmod('./db/ping_reports.db', 0777);
 
         // Update web folders access mode
-        // @chmod('./web/css', 0777);
-        // @chmod('./web/js', 0777);
+        @chmod('./web/css', 0777);
+        @chmod('./web/js', 0777);
+        @chmod('./web/js/modules', 0777);
     }
 }
