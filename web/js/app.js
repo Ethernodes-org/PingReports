@@ -21,7 +21,7 @@ function buildChart(data)
 
             case 'details':
                 for (j = 0; j < 2; j++) {
-                    if ('S' == d[5] || !j) {
+                    if (('S' == d[5]) || !j) {
                         // Success, common point
                         record = [
                             Date.UTC(d[0], d[1], d[2], d[3], d[4]),
