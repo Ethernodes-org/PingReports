@@ -9,6 +9,9 @@ function buildChart(data)
 
     for (i = 1; i < data.length; i++) {
         d = data[i];
+        if (!d) {
+            continue;
+        }
         switch (view) {
             case 'uptime':
                 for (j = 0; j < services.length; j++) {
@@ -20,8 +23,8 @@ function buildChart(data)
                         d[4 + j]
                     ];
                     series[j].push(record);
-
                 }
+
                 break; // case 'uptime'
 
             case 'details':
@@ -95,8 +98,6 @@ function buildChart(data)
 
             break; // case 'details'
     }
-    console.log(_series);///
-
     highchart = {
         chart: {
             zoomType: 'x'
@@ -114,7 +115,9 @@ function buildChart(data)
         },
 
         legend: {
-            enabled: view != 'uptime'
+            layout:        'vertical',
+            align:         'right',
+            verticalAlign: 'middle'
         },
 
         xAxis: {
