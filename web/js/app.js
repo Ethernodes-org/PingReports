@@ -68,7 +68,7 @@ function buildChart(data)
                     ]
                 },
                 marker: {
-                    radius: 2
+                    radius: 1
                 },
                 lineWidth: 1,
                 states: {
@@ -87,14 +87,15 @@ function buildChart(data)
 
         series: [
             {
-                type: 'area',
-                name: 'Connect time',
-                data: series[0]
+                type:  'area',
+                name:  'Total time',
+                color: '#000',
+                data:  series[1]
             },
             {
                 type: 'area',
-                name: 'Total time',
-                data: series[1]
+                name: 'Connect time',
+                data: series[0]
             }
         ]
     });
