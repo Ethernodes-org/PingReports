@@ -55,4 +55,36 @@ class SQLite extends DataAccessPDO implements IDataAccessLayer{
         $this->prepareRecord($record);
         $this->storeStmt->execute($record);
     }
+
+    /**
+     * Returns records.
+     *
+     * @param  array $aFields
+     * @param  array $aFilter
+     * @param  int   $start
+     * @param  int   $limit
+     * @return array
+     */
+    public function get(array $aFields, array $aFilter, $start, $limit)
+    {
+        $aFields = array_map(array($this, 'sanitizeFieldName'), $aFields);
+        $query =
+            "SELECT `" . implode("`, `", $aFields). "` " .
+            "FROM `ping_result` ";
+        if(sizeof($aFilter) > 0){
+            $query .= "WHERE " . $this->getFilterSQL($aFilter);
+        }
+        $query .=
+            "ORDER BY `date` ASC " .
+            "LIMIT ?, ?";
+        $stmt = $this->oDB->prepare($query);
+        $index = 0;
+        $this->bindFilterValues($stmt, $aFilter, $index);
+        $stmt->bindValue(++$index, $start, PDO::PARAM_INT);
+        $stmt->bindValue(++$index, $limit, PDO::PARAM_INT);
+        $stmt->execute();
+        $return = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+        return $return;
+    }
 }

@@ -1,29 +1,39 @@
 <?php
 
 use AmiLabs\DevKit\Controller;
-use AmiLabs\CryptoKit\BlockchainIO;
 
 /**
  * Index controller.
  */
 class indexController extends Controller
 {
-    public function __construct()
-    {
-        parent::__construct();
-        // $testnet = (bool)$this->getRequest()->get('testnet');
-        // $this->getConfig()->set('CryptoKit/testnet', $testnet);
-    }
-
     /**
      * Index action.
      */
     public function actionIndex()
     {
+        $services = array_keys($this->getConfig()->get('services'));
         $this->oView->set(
             'services',
-            array_keys($this->getConfig()->get('services')),
+            $services,
             TRUE
+        );
+
+        $service = $this->getRequest()->get('service', FALSE);
+        if (
+            FALSE === $service ||
+            !in_array($service, $services)
+        ) {
+            $service = reset($services);
+        }
+        $this->oView->set(
+            'service',
+            $service,
+            TRUE
+        );
+        $this->oView->set(
+            'service',
+            $service
         );
     }
 }

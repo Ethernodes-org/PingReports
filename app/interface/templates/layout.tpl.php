@@ -26,10 +26,10 @@
             <div id="navbar" class="collapse navbar-collapse">
                 <ul class="nav navbar-nav">
 <?php
-foreach($services as $notActive => $service){
+foreach($services as $svc){
 ?>
-                    <li data-page="<?= $service ?>"<?= $notActive ? '' : ' class="active"' ?>>
-                        <a><?= $service ?></a>
+                    <li data-page="<?= $svc ?>"<?= $service != $svc ? '' : ' class="active"' ?>>
+                        <a href="?service=<?= rawurlencode($svc) ?>"><?= $svc ?></a>
                     </li>
 <?php
 }

@@ -25,4 +25,15 @@ interface IDataAccessLayer{
      * @return void
      */
     public function store($date, $service, $status, $connectTime, $totalTime);
+
+    /**
+     * Returns specified servce records.
+     *
+     * @param  array $aFields
+     * @param  array $aFilter
+     * @param  int   $start
+     * @param  int   $limit
+     * @return array
+     */
+    public function get(array $aFields, array $aFilter, $start, $limit);
 }

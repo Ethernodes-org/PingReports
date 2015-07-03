@@ -1,14 +1,15 @@
 <script type="text/javascript">
 
 $(function () {
-    $.getJSON('http://www.highcharts.com/samples/data/jsonp.php?filename=usdeur.json&callback=?', function (data) {
+    /// $.getJSON('http://www.highcharts.com/samples/data/jsonp.php?filename=usdeur.json&callback=?', function (data) {
+    $.getJSON('json.php?service=<?= rawurlencode($service) ?>&callback=?', function (data) {
 
         $('#container').highcharts({
             chart: {
                 zoomType: 'x'
             },
             title: {
-                text: 'USD to EUR exchange rate over time'
+                text: 'Ping Reports'
             },
             subtitle: {
                 text: document.ontouchstart === undefined ?
@@ -19,8 +20,9 @@ $(function () {
             },
             yAxis: {
                 title: {
-                    text: 'Exchange rate'
-                }
+                    text: 'Time, sec.'
+                },
+                min: 0
             },
             legend: {
                 enabled: false
@@ -54,7 +56,7 @@ $(function () {
 
             series: [{
                 type: 'area',
-                name: 'USD to EUR',
+                name: 'Total time',
                 data: data
             }]
         });
