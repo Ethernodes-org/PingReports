@@ -96,6 +96,7 @@ switch ($view) {
                     if (!isset($rows[$dateHour])) {
                         $rows[$dateHour] = array();
                     }
+                    $runsPerHour = $dateHour < '2015-07-04 22' ? 60 : 600;
                     while (
                         isset($records[$lastFoundRecordIndex]) &&
                         $dateHour == $records[$lastFoundRecordIndex]['date_hour']
@@ -104,7 +105,7 @@ switch ($view) {
                         $total  = $records[$lastFoundRecordIndex]['total'];
                         $failed = $records[$lastFoundRecordIndex]['failed'];
                         $rows[$dateHour][array_search($svc, $services)] =
-                            sprintf("%.2f", (60 - (60 - $total) - $failed) * 100 / 60);
+                            sprintf("%.2f", ($runsPerHour - ($runsPerHour - $total) - $failed) * 100 / $runsPerHour);
                         ++$lastFoundRecordIndex;
                     }
                     foreach (array_keys($services) as $index) {
