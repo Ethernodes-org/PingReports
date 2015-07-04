@@ -32,16 +32,16 @@ function buildChart(data)
                     if ('undefined' == typeof(series[j])) {
                         series[j] = [];
                     }
-                    if ('S' == d[5] || !j) {
+                    if ('S' == d[6] || !j) {
                         // Success, common point
                         record = [
-                            Date.UTC(d[0], d[1], d[2], d[3], d[4]),
-                            d[6 + j]
+                            Date.UTC(d[0], d[1], d[2], d[3], d[4], d[5]),
+                            d[7 + j]
                         ];
                     } else {
                         record = {
-                            x: Date.UTC(d[0], d[1], d[2], d[3], d[4]),
-                            y: d[6 + j],
+                            x: Date.UTC(d[0], d[1], d[2], d[3], d[4], d[5]),
+                            y: d[7 + j],
                             marker: {
                                 fillColor: 'red',
                                 symbol: 'diamond',
