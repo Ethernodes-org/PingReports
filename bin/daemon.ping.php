@@ -34,9 +34,11 @@ try {
             array($caller, $serviceConfig['method']),
             $serviceConfig['args']
         );
-    if(is_callable(array($caller, 'getTransport'))){
+    if (is_callable(array($caller, 'getTransport'))) {
         $transportInfo = $caller->getTransport()->getInfo();
-    }else{
+    } else if (is_callable(array($caller, 'getInfo'))) {
+        $transportInfo = $caller->getInfo();
+    } else {
         $time = microtime(TRUE) - $time;
         $transportInfo = array(
             'connect_time' => 0,
