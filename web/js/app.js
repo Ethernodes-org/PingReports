@@ -68,7 +68,7 @@ function buildChart(data)
             _series = [];
             for (j = 0; j < services.length; j++) {
                 _series[j] = {
-                    type:  'area',
+                    // type:  'area',
                     name:  services[j],
                     // color: '#000',
                     data:  series[j]
@@ -144,11 +144,13 @@ function buildChart(data)
                     radius: 1
                 },
                 lineWidth: 1,
+                /*
                 states: {
                     hover: {
                         lineWidth: 1
                     }
                 },
+                */
                 threshold: null
             }
         },
