@@ -62,7 +62,7 @@ switch ($view) {
 
             $records = $dal->get(
                 array(
-                    "`service`, " .
+                    "`service`",
                     "SUBSTR(`date`, 1, 13) `date_hour`",
                     "SUM(1) `total`",
                     "SUM(CASE (`status`) WHEN 'F' THEN 1 ELSE 0 END) `failed`",
@@ -96,7 +96,7 @@ switch ($view) {
                     if (!isset($rows[$dateHour])) {
                         $rows[$dateHour] = array();
                     }
-                    $runsPerHour = $dateHour < '2015-07-04 22' ? 60 : 600;
+                    $runsPerHour = $dateHour < '2015-07-04 22' ? 60 : 360;
                     while (
                         isset($records[$lastFoundRecordIndex]) &&
                         $dateHour == $records[$lastFoundRecordIndex]['date_hour']
