@@ -6,9 +6,9 @@ use AmiLabs\PingReports\DataAccess;
 $appName = 'ping';
 require_once '../app/init.php';
 
-echo "Ping daemon\n\n";
+echo sprintf("[%s] daemon.ping.php%s\n", date('Y-m-d H:i:s'), isset($argv[1]) ? ' ' . $argv[1] : '');
 if (2 != $argc) {
-    echo "Usage: /path/to/php daemon.ping.php service\n\n";
+    echo "\nUsage: /path/to/php daemon.ping.php service\n\n";
     die;
 }
 
