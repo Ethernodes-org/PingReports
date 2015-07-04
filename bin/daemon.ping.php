@@ -6,9 +6,10 @@ use AmiLabs\PingReports\DataAccess;
 $appName = 'ping';
 require_once '../app/init.php';
 
-echo sprintf("[%s] daemon.ping.php%s\n", date('Y-m-d H:i:s'), isset($argv[1]) ? ' ' . $argv[1] : '');
 if (2 != $argc) {
-    echo "\nUsage: /path/to/php daemon.ping.php service\n\n";
+    echo
+        "Ping daemon\n\n",
+        "Usage: /path/to/php daemon.ping.php service\n\n";
     die;
 }
 
@@ -19,6 +20,16 @@ if (!isset($config['services'][$service])) {
     echo sprintf("Unknown service alias '%s'!\n\n", $service);
     die;
 }
+
+file_put_contents(
+    dirname(__FILE__) . '/daemon.ping.log',
+    sprintf(
+        "[%s] %s\n",
+        date('Y-m-d H:i:s'),
+        $service
+    ),
+    FILE_APPEND | LOCK_EX
+);
 
 $serviceConfig = $config['services'][$service];
 foreach ($serviceConfig['code'] as $statement) {

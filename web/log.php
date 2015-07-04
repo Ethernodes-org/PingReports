@@ -2,4 +2,4 @@
 
 header('Content-Type: text/plain');
 
-readfile(dirname(__FILE__) . '/../bin/daemon.ping.out');
+readfile(dirname(__FILE__) . '/../bin/daemon.ping.log');
