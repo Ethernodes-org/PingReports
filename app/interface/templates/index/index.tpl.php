@@ -1,5 +1,6 @@
 <a id="a-uptime"></a>
 <div class="starter-template" style="padding-top: 50px;" id="container-uptime">
+<center><img style="width: 64px; height: 64px;" src="img/loading.gif" alt="Loading..." title="Loading" /></center>
 </div>
 <?php
 foreach ($services as $service => $svc) {
@@ -10,6 +11,7 @@ foreach ($services as $service => $svc) {
     <a href="<?= $svc['cleanURL'] ?>" target="_blank"><?= $svc['url'] ?> &raquo;</a>
 </div>
 <div class="starter-template" id="container-<?= str_replace('.', '-', $service) ?>">
+<center><img style="width: 64px; height: 64px;" src="img/loading.gif" alt="Loading..." title="Loading" /></center>
 </div>
 <?php
 }

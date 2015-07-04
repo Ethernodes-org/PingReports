@@ -30,5 +30,6 @@ class Composer{
         @chmod('./web/css', 0777);
         @chmod('./web/js', 0777);
         @chmod('./web/js/modules', 0777);
+        @chmod('./web/img', 0777);
     }
 }
