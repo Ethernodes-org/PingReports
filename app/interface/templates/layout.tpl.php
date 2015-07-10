@@ -10,7 +10,7 @@
     <link rel="stylesheet" href="/css/plugins.css">
     <link rel="stylesheet" href="/css/custom.css">
     <script src="/js/jquery.min.js"></script>
-    <script src="/js/app.js?v=7"></script>
+    <script src="/js/app.js?v=9"></script>
 </head>
 <body>
     <nav class="navbar navbar-inverse navbar-fixed-top">

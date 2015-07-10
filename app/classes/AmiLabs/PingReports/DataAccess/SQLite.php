@@ -15,12 +15,12 @@ class SQLite extends DataAccessPDO implements IDataAccessLayer
     /**
      * @var \PDOStatement
      */
-    protected $storeStmt;
+    protected $borderDatesStmt;
 
     /**
      * @var \PDOStatement
      */
-    protected $borderDatesStmt;
+    protected $deleteStmt;
 
     /**
      * Initializes layer.
@@ -33,43 +33,41 @@ class SQLite extends DataAccessPDO implements IDataAccessLayer
         $this->connect($config);
 
         $query =
-            "INSERT INTO `ping_result` " .
-            "(`date`, `service`, `status`, `connect_time`, `total_time`) " .
-            "VALUES " .
-            "(:date, :service, :status, :connect_time, :total_time)";
-        $this->storeStmt = $this->oDB->prepare($query);
-
-        $query =
             "SELECT " .
                 "MIN(`date`) `min_date`, " .
                 "MAX(`date`) `max_date` " .
             "FROM `ping_result` " .
             "WHERE " .
-                "`service` = :service";
+                "`service` = :service AND " .
+                "`total` IS NULL";
         $this->borderDatesStmt = $this->oDB->prepare($query);
+
+        $query =
+            "DELETE FROM `ping_result` " .
+            "WHERE " .
+                "`date` < :date AND " .
+                "`total` IS NULL";
+        $this->deleteStmt = $this->oDB->prepare($query);
     }
 
     /**
      * Stores result.
      *
-     * @param  string $date
-     * @param  string $service
-     * @param  string $status
-     * @param  double $connectTime
-     * @param  double $totalTime
+     * @param  array $fields
      * @return void
      */
-    public function store($date, $service, $status, $connectTime, $totalTime)
+    public function store(array $fields)
     {
-        $record = array(
-            'date'         => $date,
-            'service'      => $service,
-            'status'       => $status,
-            'connect_time' => $connectTime,
-            'total_time'   => $totalTime,
-        );
-        $this->prepareRecord($record);
-        $this->storeStmt->execute($record);
+        $query =
+            "INSERT INTO `ping_result` (`" .
+            implode('`, `', array_keys($fields)) .
+            "`) VALUES (:" .
+            implode(', :', array_keys($fields)) .
+            ")";
+        $stmt = $this->oDB->prepare($query);
+
+        $this->prepareRecord($fields);
+        $stmt->execute($fields);
     }
 
     /**
@@ -93,20 +91,20 @@ class SQLite extends DataAccessPDO implements IDataAccessLayer
     /**
      * Returns records.
      *
-     * @param  array  $aFields
-     * @param  array  $aFilter
+     * @param  array  $fields
+     * @param  array  $filter
      * @param  int    $start
      * @param  int    $limit
      * @param  string $groupBy
      * @return array
      */
-    public function get(array $aFields, array $aFilter, $start, $limit, $groupBy = '')
+    public function get(array $fields, array $filter, $start, $limit, $groupBy = '')
     {
         $query =
-            "SELECT " . implode(", ", $aFields). " " .
+            "SELECT " . implode(", ", $fields). " " .
             "FROM `ping_result` ";
-        if (sizeof($aFilter) > 0) {
-            $query .= "WHERE " . $this->getFilterSQL($aFilter);
+        if (sizeof($filter) > 0) {
+            $query .= "WHERE " . $this->getFilterSQL($filter);
         }
         if ('' !== $groupBy) {
             $query .= "GROUP BY " . $groupBy . " ";
@@ -115,9 +113,10 @@ class SQLite extends DataAccessPDO implements IDataAccessLayer
         if ($start || $limit) {
             $query .= "LIMIT ?, ?";
         }
+
         $stmt = $this->oDB->prepare($query);
         $index = 0;
-        $this->bindFilterValues($stmt, $aFilter, $index);
+        $this->bindFilterValues($stmt, $filter, $index);
         if ($start || $limit) {
             $stmt->bindValue(++$index, $start, PDO::PARAM_INT);
             $stmt->bindValue(++$index, $limit, PDO::PARAM_INT);
@@ -126,5 +125,22 @@ class SQLite extends DataAccessPDO implements IDataAccessLayer
         $return = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
         return $return;
+    }
+
+    /**
+     * Deletes records.
+     *
+     * @param  string $endDate
+     * @return void
+     */
+    public function delete($endDate)
+    {
+        $record = array(
+            'date' => $endDate,
+        );
+        $this->prepareRecord($record);
+        $this->deleteStmt->execute($record);
+
+        $this->oDB->exec("VACUUM");
     }
 }

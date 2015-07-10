@@ -28,17 +28,15 @@ function buildChart(data)
                 break; // case 'uptime'
 
             case 'details':
-                for (j = 0; j < 2; j++) {
+                for (j = 0; j < 6; j++) {
                     if ('undefined' == typeof(series[j])) {
                         series[j] = [];
                     }
-                    if ('S' == d[6] || !j) {
-                        // Success, common point
-                        record = [
-                            Date.UTC(d[0], d[1], d[2], d[3], d[4], d[5]),
-                            d[7 + j]
-                        ];
-                    } else {
+                    if ('undefined' == typeof(d[7 + j])) {
+                        continue;
+                    }
+                    if ('F' == d[6] && !j) {
+                        // Fail
                         record = {
                             x: Date.UTC(d[0], d[1], d[2], d[3], d[4], d[5]),
                             y: d[7 + j],
@@ -48,6 +46,12 @@ function buildChart(data)
                                 radius: 4
                             }
                         };
+                    } else {
+                        // Success, common point
+                        record = [
+                            Date.UTC(d[0], d[1], d[2], d[3], d[4], d[5]),
+                            d[7 + j]
+                        ];
                     }
                     series[j].push(record);
                 }
@@ -94,13 +98,35 @@ function buildChart(data)
                 type: 'area',
                 name: 'Connect time',
                 data: series[0]
-            }];
+            },
+            {
+                type:  'area',
+                name:  'Max total time',
+                data:  series[2]
+            },
+            {
+                type: 'area',
+                name: 'Average total time',
+                data: series[3]
+            },
+            {
+                type:  'area',
+                name:  'Max connect time',
+                data:  series[4]
+            },
+            {
+                type: 'area',
+                name: 'Average connect time',
+                data: series[5]
+            }
+            ];
 
             break; // case 'details'
     }
     highchart = {
         chart: {
-            zoomType: 'x'
+            zoomType: 'x',
+            animation: false,
         },
 
         title: {

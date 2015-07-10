@@ -72,10 +72,11 @@ try {
 
 $dal = DataAccess::getLayer($config['dataAccess']['layer']);
 $dal->init($config['dataAccess']);
-$dal->store(
-    date('Y-m-d H:i:s'),
-    $service,
-    $success ? 'S' : 'F',
-    $transportInfo['connect_time'],
-    $transportInfo['total_time']
+$record = array(
+    'date'         => date('Y-m-d H:i:s'),
+    'service'      => $service,
+    'status'       => $success ? 'S' : 'F',
+    'connect_time' => $transportInfo['connect_time'],
+    'total_time'   => $transportInfo['total_time'],
 );
+$dal->store($record);

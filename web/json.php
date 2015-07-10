@@ -46,6 +46,7 @@ switch ($view) {
     case 'uptime':
         // Get min date
         $borderDates = $dal->getBorderDates($service);
+        // var_dump($borderDates);die;###
         if (!$borderDates) {
             // No records
             break;
@@ -68,6 +69,11 @@ switch ($view) {
                     "SUM(CASE (`status`) WHEN 'F' THEN 1 ELSE 0 END) `failed`",
                 ),
                 array(
+                    array(
+                        'field' => 'total',
+                        'op'    => '',
+                        'value' => '=!IS NULL',
+                    ),
                     array(
                         'field' => 'date',
                         'op'    => '>=',
@@ -141,7 +147,19 @@ switch ($view) {
         $limit = 500;
         do {
             $records = $dal->get(
-                array('date', 'status', 'connect_time', 'total_time'),
+                array(
+                    'date',
+                    'status',
+                    'connect_time',
+                    'total_time',
+
+                    'connect_time_avg',
+                    'connect_time_max',
+                    'total_time_avg',
+                    'total_time_max',
+                    'total',
+                    'failed',
+                ),
                 array(
                     array(
                         'field' => 'service',
@@ -160,7 +178,7 @@ switch ($view) {
                 $time = strtotime($record['date']);
                 echo sprintf(
                     // "[Date.UTC(%d,%d,%d,%d,%d,%d),%.4f]%s\n",
-                    "[%d,%d,%d,%d,%d,%d,\"%s\",%.3f,%.3f]%s\n",
+                    "[%d,%d,%d,%d,%d,%d,\"%s\",%.3f,%.3f%s]%s\n",
                     date('Y', $time),
                     date('m', $time),
                     date('d', $time),
@@ -170,6 +188,15 @@ switch ($view) {
                     $record['status'],
                     $record['connect_time'],
                     $record['total_time'],
+                    $record['connect_time_max']
+                        ? sprintf(
+                            ",%.3f,%.3f,%.3f,%.3f",
+                            $record['total_time_max'],
+                            $record['total_time_avg'],
+                            $record['connect_time_max'],
+                            $record['connect_time_avg']
+                        )
+                        : '',
                     ($index + 1) < $qty ? ',' : ''
                 );
             }

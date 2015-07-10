@@ -7,6 +7,9 @@ namespace AmiLabs\PingReports;
  */
 interface IDataAccessLayer
 {
+    const GROUP_BY_HOUR = 1;
+    const GROUP_BY_DAY  = 2;
+
     /**
      * Initializes layer.
      *
@@ -18,14 +21,10 @@ interface IDataAccessLayer
     /**
      * Stores result.
      *
-     * @param  string $date
-     * @param  string $service
-     * @param  string $status
-     * @param  double $connectTime
-     * @param  double $totalTime
+     * @param  array $fields
      * @return void
      */
-    public function store($date, $service, $status, $connectTime, $totalTime);
+    public function store(array $fields);
 
     /**
      * Returns min/max dates.
@@ -38,12 +37,20 @@ interface IDataAccessLayer
     /**
      * Returns specified servce records.
      *
-     * @param  array $aFields
-     * @param  array $aFilter
-     * @param  int   $start
-     * @param  int   $limit
+     * @param  array  $fields
+     * @param  array  $filter
+     * @param  int    $start
+     * @param  int    $limit
      * @param  string $groupBy
      * @return array
      */
-    public function get(array $aFields, array $aFilter, $start, $limit, $groupBy = '');
+    public function get(array $fields, array $filter, $start, $limit, $groupBy = '');
+
+    /**
+     * Deletes records.
+     *
+     * @param  string $endDate
+     * @return void
+     */
+    public function delete($endDate);
 }
