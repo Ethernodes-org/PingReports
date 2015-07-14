@@ -37,6 +37,9 @@ foreach($services as $service){
 <?php
 }
 ?>
+                    <li class="active">
+                        <a href="<?= $externalLink ?>">{ AmiLabs Tools}</a>
+                    </li>
                 </ul>
             </div>
         </div>

@@ -43,5 +43,10 @@ class indexController extends Controller
             array_keys($services),
             TRUE
         );
+        $this->oView->set(
+            'externalLink',
+            $this->getConfig()->get('externalLink'),
+            TRUE
+        );
     }
 }
