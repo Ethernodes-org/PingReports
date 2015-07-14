@@ -29,10 +29,10 @@ interface IDataAccessLayer
     /**
      * Returns min/max dates.
      *
-     * @param  string $service
+     * @param  array $filter
      * @return mixed
      */
-    public function getBorderDates($service);
+    public function getBorderDates(array $filter = array());
 
     /**
      * Returns specified servce records.

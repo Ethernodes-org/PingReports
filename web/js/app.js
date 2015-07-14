@@ -28,7 +28,7 @@ function buildChart(data)
                 break; // case 'uptime'
 
             case 'details':
-                for (j = 0; j < 6; j++) {
+                for (j = 0; j < 8; j++) {
                     if ('undefined' == typeof(series[j])) {
                         series[j] = [];
                     }
@@ -118,6 +118,16 @@ function buildChart(data)
                 type: 'area',
                 name: 'Average connect time',
                 data: series[5]
+            },
+            {
+                type:  'area',
+                name:  'Total hits',
+                data:  series[6]
+            },
+            {
+                type: 'area',
+                name: 'Failed hits',
+                data: series[7]
             }
             ];
 

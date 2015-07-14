@@ -15,11 +15,6 @@ class SQLite extends DataAccessPDO implements IDataAccessLayer
     /**
      * @var \PDOStatement
      */
-    protected $borderDatesStmt;
-
-    /**
-     * @var \PDOStatement
-     */
     protected $deleteStmt;
 
     /**
@@ -32,15 +27,6 @@ class SQLite extends DataAccessPDO implements IDataAccessLayer
     {
         $this->connect($config);
 
-        $query =
-            "SELECT " .
-                "MIN(`date`) `min_date`, " .
-                "MAX(`date`) `max_date` " .
-            "FROM `ping_result` " .
-            "WHERE " .
-                "`service` = :service AND " .
-                "`total` IS NULL";
-        $this->borderDatesStmt = $this->oDB->prepare($query);
 
         $query =
             "DELETE FROM `ping_result` " .
@@ -73,17 +59,30 @@ class SQLite extends DataAccessPDO implements IDataAccessLayer
     /**
      * Returns min/max dates.
      *
-     * @param  string $service
+     * @param  array $filter
      * @return mixed
      */
-    public function getBorderDates($service)
+    public function getBorderDates(array $filter = array())
     {
-        $record = array(
-            'service' => $service,
+        $filter[] = array(
+            'field' => 'total',
+            'op'    => '',
+            'value' => '=!IS NULL',
         );
-        $this->prepareRecord($record);
-        $this->borderDatesStmt->execute($record);
-        $return = $this->borderDatesStmt->fetch(PDO::FETCH_ASSOC);
+
+        $query =
+            "SELECT " .
+                "MIN(`date`) `min_date`, " .
+                "MAX(`date`) `max_date` " .
+            "FROM `ping_result`";
+        if (sizeof($filter) > 0) {
+            $query .= " WHERE " . $this->getFilterSQL($filter);
+        }
+        $stmt = $this->oDB->prepare($query);
+        $index = 0;
+        $this->bindFilterValues($stmt, $filter, $index);
+        $stmt->execute();
+        $return = $stmt->fetch(PDO::FETCH_ASSOC);
 
         return $return;
     }

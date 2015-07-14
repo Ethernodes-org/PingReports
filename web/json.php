@@ -45,13 +45,18 @@ echo sprintf(
 switch ($view) {
     case 'uptime':
         // Get min date
-        $borderDates = $dal->getBorderDates($service);
+        $borderDates = $dal->getBorderDates();
         // var_dump($borderDates);die;###
         if (!$borderDates) {
             // No records
             break;
         }
-
+        /*
+        $borderDates = array(
+            'min_date' => '2015-07-14 09:00:00',
+            'max_date' => '2015-07-14 12:00:00',
+        );###
+        */
         $time = strtotime($borderDates['min_date']);
         $maxDate = substr($borderDates['max_date'], 0, -6);
         $month = 0;
@@ -59,7 +64,7 @@ switch ($view) {
             $timeFrom = mktime(0, 0, 0, date('m', $time) + $month, 1, date('Y', $time));
             $yearMonthFrom = date('Y-m', $timeFrom) . '-01';
             $timeTo = mktime(0, 0, 0, date('m', $time) + $month + 1, 1, date('Y', $time));
-            $yearMonthTo = date('Y-m', $timeTo) . '-01';
+            $yearMonthTo = date('Y-m', $timeTo) . '-01 00:00:00';
 
             $records = $dal->get(
                 array(
@@ -89,7 +94,19 @@ switch ($view) {
                 0,
                 "`service`, SUBSTR(`date`, 1, 13)"
             );
-            $lastFoundRecordIndex = 0;
+            $dateHourRecords = array();
+            foreach ($records as $record) {
+                $dateHour = $record['date_hour'];
+                $svc      = $record['service'];
+                unset($record['date_hour'], $record['service']);
+                if (!isset($dateHourRecords[$dateHour])) {
+                    $dateHourRecords[$dateHour] = array();
+                }
+                $dateHourRecords[$dateHour][array_search($svc, $services)] = $record;
+            }
+            $records = $dateHourRecords;
+            unset($dateHourRecords);
+
             $last = FALSE;
             $rows = array();
             for ($day = 1; $day < 32; ++$day) {
@@ -99,24 +116,19 @@ switch ($view) {
                     if ($dateHour . ':59:59' < $borderDates['min_date']) {
                         continue;
                     }
-                    if (!isset($rows[$dateHour])) {
-                        $rows[$dateHour] = array();
-                    }
-                    $runsPerHour = $dateHour < '2015-07-04 22' ? 60 : 360;
-                    while (
-                        isset($records[$lastFoundRecordIndex]) &&
-                        $dateHour == $records[$lastFoundRecordIndex]['date_hour']
-                    ) {
-                        $svc    = $records[$lastFoundRecordIndex]['service'];
-                        $total  = $records[$lastFoundRecordIndex]['total'];
-                        $failed = $records[$lastFoundRecordIndex]['failed'];
-                        $rows[$dateHour][array_search($svc, $services)] =
-                            sprintf("%.2f", ($runsPerHour - ($runsPerHour - $total) - $failed) * 100 / $runsPerHour);
-                        ++$lastFoundRecordIndex;
-                    }
+                    $rows[$dateHour] = array();
                     foreach (array_keys($services) as $index) {
-                        if (!isset($rows[$dateHour][$index])) {
-                            $rows[$dateHour][$index] = 0;
+                        $rows[$dateHour][$index] = 0;
+                    }
+                    if (isset($records[$dateHour])) {
+                        $runsPerHour = $dateHour < '2015-07-04 22' ? 60 : 360;
+                        foreach (array_keys($services) as $index) {
+                            if (isset($records[$dateHour][$index])) {
+                                $total  = $records[$dateHour][$index]['total'];
+                                $failed = $records[$dateHour][$index]['failed'];
+                                $rows[$dateHour][$index] =
+                                    sprintf("%.2f", ($runsPerHour - ($runsPerHour - $total) - $failed) * 100 / $runsPerHour);
+                            }
                         }
                     }
 
@@ -190,11 +202,13 @@ switch ($view) {
                     $record['total_time'],
                     $record['connect_time_max']
                         ? sprintf(
-                            ",%.3f,%.3f,%.3f,%.3f",
+                            ",%.3f,%.3f,%.3f,%.3f,%d,%d",
                             $record['total_time_max'],
                             $record['total_time_avg'],
                             $record['connect_time_max'],
-                            $record['connect_time_avg']
+                            $record['connect_time_avg'],
+                            $record['total'],
+                            $record['failed']
                         )
                         : '',
                     ($index + 1) < $qty ? ',' : ''
