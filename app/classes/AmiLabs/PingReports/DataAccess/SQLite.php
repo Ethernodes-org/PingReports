@@ -64,12 +64,13 @@ class SQLite extends DataAccessPDO implements IDataAccessLayer
      */
     public function getBorderDates(array $filter = array())
     {
+        /*
         $filter[] = array(
             'field' => 'total',
             'op'    => '',
             'value' => '=!IS NULL',
         );
-
+        */
         $query =
             "SELECT " .
                 "MIN(`date`) `min_date`, " .

@@ -18,7 +18,14 @@ $config = Registry::useStorage('CFG')->get();
 $dal = DataAccess::getLayer($config['dataAccess']['layer']);
 $dal->init($config['dataAccess']);
 
-$borderDates = $dal->getBorderDates();
+$filter = array(
+    array(
+        'field' => 'total',
+        'op'    => '',
+        'value' => '=!IS NULL',
+    )
+);
+$borderDates = $dal->getBorderDates($filter);
 if (!$borderDates) {
     die("No detailed records found!\n");
 }

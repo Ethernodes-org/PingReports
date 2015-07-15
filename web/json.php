@@ -70,15 +70,17 @@ switch ($view) {
                 array(
                     "`service`",
                     "SUBSTR(`date`, 1, 13) `date_hour`",
-                    "SUM(1) `total`",
-                    "SUM(CASE (`status`) WHEN 'F' THEN 1 ELSE 0 END) `failed`",
+                    "(CASE (`status`) WHEN '' THEN `total` ELSE SUM(1) END) `total`",
+                    "(CASE (`status`) WHEN '' THEN `failed` ELSE SUM(CASE (`status`) WHEN 'F' THEN 1 ELSE 0 END) END) `failed`",
                 ),
                 array(
+                    /*
                     array(
                         'field' => 'total',
                         'op'    => '',
                         'value' => '=!IS NULL',
                     ),
+                    */
                     array(
                         'field' => 'date',
                         'op'    => '>=',

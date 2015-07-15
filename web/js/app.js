@@ -145,19 +145,19 @@ function buildChart(data)
             },
 
             {
-                type: 'area',
+                // type: 'area',
                 name: 'Average connect time, sec.',
                 data: series[5],
                 yAxis: 0
             },
             {
-                type: 'area',
+                // type: 'area',
                 name: 'Average total time, sec.',
                 data: series[3],
                 yAxis: 0
             },
             {
-                type:  'area',
+                // type:  'area',
                 name:  'Max connect time, sec.',
                 data:  series[4],
                 yAxis: 0
