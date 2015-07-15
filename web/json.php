@@ -116,23 +116,33 @@ switch ($view) {
                     if ($dateHour . ':59:59' < $borderDates['min_date']) {
                         continue;
                     }
+                    $last = $dateHour >= $maxDate;
+                    $runsPerHour = $dateHour < '2015-07-04 22' ? 60 : 360;
+                    if ($last) {
+                        $secondsLeft =
+                            strtotime($borderDates['max_date']) -
+                            strtotime($dateHour . ':00:00');
+                        $runsPerHour =
+                            ceil($secondsLeft / (60 == $runsPerHour ? 60 : 10));
+                    }
                     $rows[$dateHour] = array();
                     foreach (array_keys($services) as $index) {
                         $rows[$dateHour][$index] = 0;
                     }
                     if (isset($records[$dateHour])) {
-                        $runsPerHour = $dateHour < '2015-07-04 22' ? 60 : 360;
                         foreach (array_keys($services) as $index) {
                             if (isset($records[$dateHour][$index])) {
                                 $total  = $records[$dateHour][$index]['total'];
                                 $failed = $records[$dateHour][$index]['failed'];
                                 $rows[$dateHour][$index] =
-                                    sprintf("%.2f", ($runsPerHour - ($runsPerHour - $total) - $failed) * 100 / $runsPerHour);
+                                    sprintf(
+                                        "%.2f",
+                                        ($runsPerHour - ($runsPerHour - $total) - $failed) * 100 / $runsPerHour
+                                    );
                             }
                         }
                     }
 
-                    $last = $dateHour >= $maxDate;
                     echo sprintf(
                         "[%d,%d,%d,%d,%s]%s\n",
                         date('Y', $timeFrom),
@@ -190,7 +200,7 @@ switch ($view) {
                 $time = strtotime($record['date']);
                 echo sprintf(
                     // "[Date.UTC(%d,%d,%d,%d,%d,%d),%.4f]%s\n",
-                    "[%d,%d,%d,%d,%d,%d,\"%s\",%.3f,%.3f%s]%s\n",
+                    "[%d,%d,%d,%d,%d,%d,\"%s\",%s,%s%s]%s\n",
                     date('Y', $time),
                     date('m', $time),
                     date('d', $time),
@@ -198,9 +208,9 @@ switch ($view) {
                     date('i', $time),
                     date('s', $time),
                     $record['status'],
-                    $record['connect_time'],
-                    $record['total_time'],
-                    $record['connect_time_max']
+                    '' == $record['status'] ? 'null' : sprintf('%.3f', $record['connect_time']),
+                    '' == $record['status'] ? 'null' : sprintf('%.3f', $record['total_time']),
+                    $record['status'] == ''
                         ? sprintf(
                             ",%.3f,%.3f,%.3f,%.3f,%d,%d",
                             $record['total_time_max'],

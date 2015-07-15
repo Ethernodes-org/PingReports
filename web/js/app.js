@@ -4,7 +4,7 @@ function buildChart(data)
         view = data[0][0],
         services = data[0][1],
         service = view == 'uptime' ? view : services,
-        d, record, i, j,
+        d, record, i, j, maxTime = 0,
         series = [], _yAxis, _series = [], highchart;
 
     for (i = 1; i < data.length; i++) {
@@ -32,7 +32,10 @@ function buildChart(data)
                     if ('undefined' == typeof(series[j])) {
                         series[j] = [];
                     }
-                    if ('undefined' == typeof(d[7 + j])) {
+                    if (
+                        'undefined' == typeof(d[7 + j]) ||
+                        null == d[7 + j]
+                    ) {
                         continue;
                     }
                     if ('F' == d[6] && !j) {
@@ -48,6 +51,12 @@ function buildChart(data)
                         };
                     } else {
                         // Success, common point
+                        /*
+                        if (2 == j) {
+                            // Max total time
+                            maxTime = Math.max(maxTime, d[7 + j]);
+                        }
+                        */
                         record = [
                             Date.UTC(d[0], d[1], d[2], d[3], d[4], d[5]),
                             d[7 + j]
@@ -82,52 +91,87 @@ function buildChart(data)
             break; // case 'uptime'
 
         case 'details':
-            _yAxis = {
-                title: {
-                    text: 'Time, sec.'
+            // console.log(maxTime);///
+            _yAxis = [
+                { // left y axis
+                    title: {
+                        text: 'Time, sec.'
+                    },
+                    min: 0,
+                    // max: maxTime,
+                    labels: {
+                        align: 'left',
+                        x: 3,
+                        y: 16,
+                        format: '{value:.,0f}'
+                    },
+                    showFirstLabel: false
                 },
-                min: 0
-            };
+                { // right y axis
+                    min: 0,
+                    gridLineWidth: 0,
+                    opposite: true,
+                    title: {
+                        text: 'Hits'
+                    },
+                    labels: {
+                        align: 'right',
+                        x: -3,
+                        y: 16/*,
+                        format: '{value:.,0f}'*/
+                    },
+                    showFirstLabel: false
+                }
+            ];
+
             _series = [{
                 type:  'area',
-                name:  'Total time',
-                color: '#000',
-                data:  series[1]
+                name:  'Total time, sec.',
+                // color: '#000',
+                data:  series[1],
+                yAxis: 0
             },
             {
                 type: 'area',
-                name: 'Connect time',
-                data: series[0]
+                name: 'Connect time, sec.',
+                data: series[0],
+                yAxis: 0
             },
             {
                 type:  'area',
-                name:  'Max total time',
-                data:  series[2]
+                name:  'Max total time, sec.',
+                data:  series[2],
+                yAxis: 0
             },
             {
                 type: 'area',
-                name: 'Average total time',
-                data: series[3]
+                name: 'Average total time, sec.',
+                data: series[3],
+                yAxis: 0
             },
             {
                 type:  'area',
-                name:  'Max connect time',
-                data:  series[4]
+                name:  'Max connect time, sec.',
+                data:  series[4],
+                yAxis: 0
             },
             {
                 type: 'area',
-                name: 'Average connect time',
-                data: series[5]
+                name: 'Average connect time, sec.',
+                data: series[5],
+                yAxis: 0
             },
             {
-                type:  'area',
+                // type:  'area',
                 name:  'Total hits',
-                data:  series[6]
+                data:  series[6],
+                yAxis: 1
             },
             {
-                type: 'area',
+                // type: 'area',
                 name: 'Failed hits',
-                data: series[7]
+                data: series[7],
+                yAxis: 1
             }
             ];
 
@@ -145,9 +189,16 @@ function buildChart(data)
 
         subtitle: {
             text:
-                document.ontouchstart === undefined
-                    ? 'Click and drag in the plot area to zoom in'
-                    : 'Pinch the chart to zoom in'
+                (
+                    'uptime' == view
+                        ? 'Hits grouped by hours, 100% means all hits were done and successfull.<br />'
+                        : ''
+                ) +
+                (
+                    document.ontouchstart === undefined
+                        ? 'Click and drag in the plot area to zoom in.'
+                        : 'Pinch the chart to zoom in.'
+                )
         },
 
         legend: {
@@ -172,8 +223,8 @@ function buildChart(data)
                         y2: 1
                     },
                     stops: [
-                        [0, Highcharts.getOptions().colors[0]],
-                        [1, Highcharts.Color(Highcharts.getOptions().colors[0]).setOpacity(0).get('rgba')]
+                        [0, Highcharts.getOptions().colors[2]],
+                        [1, Highcharts.Color(Highcharts.getOptions().colors[2]).setOpacity(0).get('rgba')]
                     ]
                 },
                 marker: {

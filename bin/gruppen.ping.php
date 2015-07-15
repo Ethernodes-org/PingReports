@@ -18,8 +18,21 @@ $config = Registry::useStorage('CFG')->get();
 $dal = DataAccess::getLayer($config['dataAccess']['layer']);
 $dal->init($config['dataAccess']);
 
-$time = mktime(24, 0, 0, date('n'), date('j') - $config['daysNoGruppen'], date('Y'));
-$endDate = date('Y-m-d', $time) . ' 00:00:00';
+$borderDates = $dal->getBorderDates();
+if (!$borderDates) {
+    die("No detailed records found!\n");
+}
+
+$time = strtotime($borderDates['max_date']);
+$time = mktime(
+    date('G', $time),
+    0,
+    0,
+    date('n', $time),
+    date('j', $time) - $config['daysNoGruppen'],
+    date('Y', $time)
+);
+$endDate = date('Y-m-d H', $time) . ':00:00';
 
 writeLog(sprintf("Grouping records until %s...", $endDate));
 $len = 13;
