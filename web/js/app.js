@@ -93,15 +93,15 @@ function buildChart(data)
             break; // case 'uptime'
 
         case 'details':
-            // console.log('maxTime', maxTime);///
-            // console.log('maxHits', maxHits);///
+            console.log('maxTime', maxTime);///
+            console.log('maxHits', maxHits);///
             _yAxis = [
                 { // left y axis
                     title: {
                         text: 'Time, sec.'
                     },
                     min: 0,
-                    // max: maxTime,
+                    max: maxTime,
                     // tickInterval: 20,
                     labels: {
                         align: 'left',
@@ -113,7 +113,7 @@ function buildChart(data)
                 },
                 { // right y axis
                     min: 0,
-                    // max: maxHits,
+                    max: maxHits,
                     tickInterval: 10,
                     gridLineWidth: 0,
                     opposite: true,
