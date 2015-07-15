@@ -4,7 +4,7 @@ function buildChart(data)
         view = data[0][0],
         services = data[0][1],
         service = view == 'uptime' ? view : services,
-        d, record, i, j, maxTime = 0,
+        d, record, i, j, maxTime = 0, maxHits = 0,
         series = [], _yAxis, _series = [], highchart;
 
     for (i = 1; i < data.length; i++) {
@@ -51,12 +51,14 @@ function buildChart(data)
                         };
                     } else {
                         // Success, common point
-                        /*
                         if (2 == j) {
                             // Max total time
                             maxTime = Math.max(maxTime, d[7 + j]);
                         }
-                        */
+                        if (6 == j) {
+                            // Total hits
+                            maxHits = Math.max(maxHits, d[7 + j]);
+                        }
                         record = [
                             Date.UTC(d[0], d[1], d[2], d[3], d[4], d[5]),
                             d[7 + j]
@@ -91,7 +93,8 @@ function buildChart(data)
             break; // case 'uptime'
 
         case 'details':
-            // console.log(maxTime);///
+            // console.log('maxTime', maxTime);///
+            // console.log('maxHits', maxHits);///
             _yAxis = [
                 { // left y axis
                     title: {
@@ -99,16 +102,19 @@ function buildChart(data)
                     },
                     min: 0,
                     // max: maxTime,
+                    // tickInterval: 20,
                     labels: {
                         align: 'left',
                         x: 3,
-                        y: 16,
-                        format: '{value:.,0f}'
+                        y: 16/*,
+                        format: '{value:.,0f}'*/
                     },
                     showFirstLabel: false
                 },
                 { // right y axis
                     min: 0,
+                    // max: maxHits,
+                    tickInterval: 10,
                     gridLineWidth: 0,
                     opposite: true,
                     title: {
@@ -124,23 +130,24 @@ function buildChart(data)
                 }
             ];
 
-            _series = [{
-                type:  'area',
-                name:  'Total time, sec.',
-                // color: '#000',
-                data:  series[1],
-                yAxis: 0
+            _series = [
+            {
+                // type:  'area',
+                name:  'Total hits',
+                data:  series[6],
+                yAxis: 1
             },
+            {
+                // type: 'area',
+                name: 'Failed hits',
+                data: series[7],
+                yAxis: 1
+            },
+
             {
                 type: 'area',
-                name: 'Connect time, sec.',
-                data: series[0],
-                yAxis: 0
-            },
-            {
-                type:  'area',
-                name:  'Max total time, sec.',
-                data:  series[2],
+                name: 'Average connect time, sec.',
+                data: series[5],
                 yAxis: 0
             },
             {
@@ -156,23 +163,25 @@ function buildChart(data)
                 yAxis: 0
             },
             {
-                type: 'area',
-                name: 'Average connect time, sec.',
-                data: series[5],
+                type:  'area',
+                name:  'Max total time, sec.',
+                data:  series[2],
+                yAxis: 0
+            },
+
+            {
+                // type:  'area',
+                name:  'Total time, sec.',
+                // color: '#000',
+                data:  series[1],
                 yAxis: 0
             },
             {
-                // type:  'area',
-                name:  'Total hits',
-                data:  series[6],
-                yAxis: 1
-            },
-            {
                 // type: 'area',
-                name: 'Failed hits',
-                data: series[7],
-                yAxis: 1
-            }
+                name: 'Connect time, sec.',
+                data: series[0],
+                yAxis: 0
+            },
             ];
 
             break; // case 'details'
@@ -223,8 +232,8 @@ function buildChart(data)
                         y2: 1
                     },
                     stops: [
-                        [0, Highcharts.getOptions().colors[2]],
-                        [1, Highcharts.Color(Highcharts.getOptions().colors[2]).setOpacity(0).get('rgba')]
+                        [0, Highcharts.getOptions().colors[5]],
+                        [1, Highcharts.Color(Highcharts.getOptions().colors[5]).setOpacity(0).get('rgba')]
                     ]
                 },
                 marker: {
