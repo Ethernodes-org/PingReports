@@ -93,8 +93,8 @@ function buildChart(data)
             break; // case 'uptime'
 
         case 'details':
-            console.log('maxTime', maxTime);///
-            console.log('maxHits', maxHits);///
+            // console.log('maxTime', maxTime);///
+            // console.log('maxHits', maxHits);///
             _yAxis = [
                 { // left y axis
                     title: {
@@ -130,30 +130,51 @@ function buildChart(data)
                 }
             ];
 
+            /*
+            series[8] = [];
+            for (j in series[7]) {
+                var d = new Date;
+                record = series[7][j];
+                d.setTime(record[0]);
+                console.log(d);///
+                break;
+            }
+            */
+
             _series = [
             {
                 // type:  'area',
-                name:  'Total hits',
-                data:  series[6],
-                yAxis: 1
+                name:    'Total hits',
+                data:    series[6],
+                visible: false,
+                yAxis:   1
             },
             {
                 // type: 'area',
-                name: 'Failed hits',
-                data: series[7],
-                yAxis: 1
+                name:    'Failed hits',
+                data:    series[7],
+                visible: false,
+                yAxis:   1
             },
+            /*
+            {
+                // type: 'area',
+                name:    'Uptime',
+                data:    series[8],
+                yAxis:   2,
+            },
+            */
 
             {
                 // type: 'area',
                 name: 'Average connect time, sec.',
-                data: series[5],
+                data:  series[5],
                 yAxis: 0
             },
             {
                 // type: 'area',
                 name: 'Average total time, sec.',
-                data: series[3],
+                data:  series[3],
                 yAxis: 0
             },
             {
@@ -179,7 +200,7 @@ function buildChart(data)
             {
                 // type: 'area',
                 name: 'Connect time, sec.',
-                data: series[0],
+                data:  series[0],
                 yAxis: 0
             },
             ];
