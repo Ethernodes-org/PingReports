@@ -23,7 +23,7 @@ if (
     $service = reset($services);
 }
 $view = $request->get('view', 'uptime');
-if (!in_array($view, array('uptime', 'details'))) {
+if (!in_array($view, array('uptime', 'grouped-details', 'details'))) {
     $view = 'uptime';
 }
 
@@ -74,13 +74,6 @@ switch ($view) {
                     "(CASE (`status`) WHEN '' THEN `failed` ELSE SUM(CASE (`status`) WHEN 'F' THEN 1 ELSE 0 END) END) `failed`",
                 ),
                 array(
-                    /*
-                    array(
-                        'field' => 'total',
-                        'op'    => '',
-                        'value' => '=!IS NULL',
-                    ),
-                    */
                     array(
                         'field' => 'date',
                         'op'    => '>=',
@@ -166,30 +159,51 @@ switch ($view) {
 
         break; // case 'uptime'
 
+    case 'grouped-details':
     case 'details':
         $start = 0;
         $limit = 500;
         do {
             $records = $dal->get(
-                array(
-                    'date',
-                    'status',
-                    'connect_time',
-                    'total_time',
-
-                    'connect_time_avg',
-                    'connect_time_max',
-                    'total_time_avg',
-                    'total_time_max',
-                    'total',
-                    'failed',
-                ),
-                array(
-                    array(
-                        'field' => 'service',
-                        'value' => $service,
+                'details' == $view
+                    ? array(
+                        'date',
+                        'status',
+                        'connect_time',
+                        'total_time',
+                    )
+                    : array(
+                        'date',
+                        'connect_time_avg',
+                        'connect_time_max',
+                        'total_time_avg',
+                        'total_time_max',
+                        'total',
+                        'failed',
                     ),
-                ),
+                'details' == $view
+                    ? array(
+                        array(
+                            'field' => 'total',
+                            'op'    => '',
+                            'value' => '=!IS NULL',
+                        ),
+                        array(
+                            'field' => 'service',
+                            'value' => $service,
+                        ),
+                    )
+                    : array(
+                        array(
+                            'field' => 'total',
+                            'op'    => '',
+                            'value' => '=!IS NOT NULL',
+                        ),
+                        array(
+                            'field' => 'service',
+                            'value' => $service,
+                        ),
+                    ),
                 $start,
                 $limit
             );
@@ -200,31 +214,37 @@ switch ($view) {
 
             foreach ($records as $index => $record) {
                 $time = strtotime($record['date']);
-                echo sprintf(
-                    // "[Date.UTC(%d,%d,%d,%d,%d,%d),%.4f]%s\n",
-                    "[%d,%d,%d,%d,%d,%d,\"%s\",%s,%s%s]%s\n",
-                    date('Y', $time),
-                    date('m', $time),
-                    date('d', $time),
-                    date('H', $time),
-                    date('i', $time),
-                    date('s', $time),
-                    $record['status'],
-                    '' == $record['status'] ? 'null' : sprintf('%.3f', $record['connect_time']),
-                    '' == $record['status'] ? 'null' : sprintf('%.3f', $record['total_time']),
-                    $record['status'] == ''
+                echo
+                    'details' == $view
                         ? sprintf(
-                            ",%.3f,%.3f,%.3f,%.3f,%d,%d",
+                            "[%d,%d,%d,%d,%d,%d,\"%s\",%.3f,%.3f]%s\n",
+                            date('Y', $time),
+                            date('m', $time),
+                            date('d', $time),
+                            date('H', $time),
+                            date('i', $time),
+                            date('s', $time),
+                            $record['status'],
+                            $record['connect_time'],
+                            $record['total_time'],
+                            ($index + 1) < $qty ? ',' : ''
+                        )
+                        : sprintf(
+                            "[%d,%d,%d,%d,%.3f,%.3f,%.3f,%.3f,%d,%d]%s\n",
+                            date('Y', $time),
+                            date('m', $time),
+                            date('d', $time),
+                            date('H', $time),
+                            // date('i', $time),
+                            // date('s', $time),
                             $record['total_time_max'],
                             $record['total_time_avg'],
                             $record['connect_time_max'],
                             $record['connect_time_avg'],
                             $record['total'],
-                            $record['failed']
-                        )
-                        : '',
-                    ($index + 1) < $qty ? ',' : ''
-                );
+                            $record['failed'],
+                            ($index + 1) < $qty ? ',' : ''
+                        );
             }
             flush();
 

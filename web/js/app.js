@@ -4,7 +4,7 @@ function buildChart(data)
         view = data[0][0],
         services = data[0][1],
         service = view == 'uptime' ? view : services,
-        d, record, i, j, maxTime = 0, maxHits = 0,
+        d, record, i, j, limit, maxTime = 0, maxHits = 0,
         series = [], _yAxis, _series = [], highchart;
 
     for (i = 1; i < data.length; i++) {
@@ -27,41 +27,45 @@ function buildChart(data)
 
                 break; // case 'uptime'
 
+            case 'grouped-details':
             case 'details':
-                for (j = 0; j < 8; j++) {
+                limit = ('details' == view ? 2 : 6);
+                for (j = 0; j < limit; j++) {
                     if ('undefined' == typeof(series[j])) {
                         series[j] = [];
                     }
-                    if (
-                        'undefined' == typeof(d[7 + j]) ||
-                        null == d[7 + j]
-                    ) {
-                        continue;
-                    }
-                    if ('F' == d[6] && !j) {
-                        // Fail
-                        record = {
-                            x: Date.UTC(d[0], d[1], d[2], d[3], d[4], d[5]),
-                            y: d[7 + j],
-                            marker: {
-                                fillColor: 'red',
-                                symbol: 'diamond',
-                                radius: 4
-                            }
-                        };
-                    } else {
-                        // Success, common point
-                        if (2 == j) {
-                            // Max total time
-                            maxTime = Math.max(maxTime, d[7 + j]);
+                    if ('details' == view) {
+                        if ('F' == d[6] && j == 1) {
+                            // Fail
+                            record = {
+                                x: Date.UTC(d[0], d[1], d[2], d[3], d[4], d[5]),
+                                y: d[7 + j],
+                                marker: {
+                                    fillColor: 'red',
+                                    symbol: 'diamond',
+                                    radius: 4
+                                }
+                            };
+                        } else {
+                            // Success, common point
+                            record = [
+                                Date.UTC(d[0], d[1], d[2], d[3], d[4], d[5]),
+                                d[7 + j]
+                            ];
                         }
-                        if (6 == j) {
+                    } else {
+                        if (0 == j) {
+                            // Max total time
+                            maxTime = Math.max(maxTime, d[4 + j]);
+                        }
+                        if (4 == j) {
                             // Total hits
-                            maxHits = Math.max(maxHits, d[7 + j]);
+                            maxHits = Math.max(maxHits, d[4 + j]);
                         }
                         record = [
-                            Date.UTC(d[0], d[1], d[2], d[3], d[4], d[5]),
-                            d[7 + j]
+                            // Date.UTC(d[0], d[1], d[2], d[3], d[4], d[5]),
+                            Date.UTC(d[0], d[1], d[2], d[3], 0, 0),
+                            d[4 + j]
                         ];
                     }
                     series[j].push(record);
@@ -93,7 +97,32 @@ function buildChart(data)
             break; // case 'uptime'
 
         case 'details':
-            // console.log('maxTime', maxTime);///
+            _yAxis = {
+                title: {
+                    text: 'Time, sec.'
+                },
+                min: 0
+            };
+            _series = [
+                {
+                    type:  'area',
+                    name:  'Total time, sec.',
+                    // color: '#000',
+                    data:  series[1]
+                },
+                {
+                    // type: 'area',
+                    name: 'Connect time, sec.',
+                    data:  series[0]
+                },
+            ];
+
+            view += ' (last 24 hours)';
+
+            break; // case 'details'
+
+        case 'grouped-details':
+            console.log('maxTime', maxTime);///
             // console.log('maxHits', maxHits);///
             _yAxis = [
                 { // left y axis
@@ -102,7 +131,7 @@ function buildChart(data)
                     },
                     min: 0,
                     max: maxTime,
-                    // tickInterval: 20,
+                    tickInterval: 0.1,
                     labels: {
                         align: 'left',
                         x: 3,
@@ -113,7 +142,8 @@ function buildChart(data)
                 },
                 { // right y axis
                     min: 0,
-                    max: maxHits,
+                    // max: maxHits,
+                    max: 100,
                     tickInterval: 10,
                     gridLineWidth: 0,
                     opposite: true,
@@ -130,80 +160,64 @@ function buildChart(data)
                 }
             ];
 
-            /*
-            series[8] = [];
-            for (j in series[7]) {
-                var d = new Date;
-                record = series[7][j];
-                d.setTime(record[0]);
-                console.log(d);///
-                break;
+            series[6] = [];
+            var t = new Date('2015-07-04 22:00:00');
+            t = t.getTime();
+            for (j in series[4]) {
+                record = series[4][j];
+                var runsPerHour = record[0] < t ? 60 : 360;
+                record[1] = (runsPerHour - (runsPerHour - record[1]) - series[5][j][1]) * 100 / runsPerHour;
+                series[6].push(record);
             }
-            */
 
             _series = [
-            {
-                // type:  'area',
-                name:    'Total hits',
-                data:    series[6],
-                visible: false,
-                yAxis:   1
-            },
-            {
-                // type: 'area',
-                name:    'Failed hits',
-                data:    series[7],
-                visible: false,
-                yAxis:   1
-            },
-            /*
-            {
-                // type: 'area',
-                name:    'Uptime',
-                data:    series[8],
-                yAxis:   2,
-            },
-            */
-
-            {
-                // type: 'area',
-                name: 'Average connect time, sec.',
-                data:  series[5],
-                yAxis: 0
-            },
-            {
-                // type: 'area',
-                name: 'Average total time, sec.',
-                data:  series[3],
-                yAxis: 0
-            },
-            {
-                // type:  'area',
-                name:  'Max connect time, sec.',
-                data:  series[4],
-                yAxis: 0
-            },
-            {
-                type:  'area',
-                name:  'Max total time, sec.',
-                data:  series[2],
-                yAxis: 0
-            },
-
-            {
-                // type:  'area',
-                name:  'Total time, sec.',
-                // color: '#000',
-                data:  series[1],
-                yAxis: 0
-            },
-            {
-                // type: 'area',
-                name: 'Connect time, sec.',
-                data:  series[0],
-                yAxis: 0
-            },
+                {
+                    name:    'Uptime',
+                    data:    series[6],
+                    yAxis:   1,
+                },
+                /*
+                {
+                    // type:  'area',
+                    name:    'Total hits',
+                    data:    series[4],
+                    visible: false,
+                    yAxis:   1
+                },
+                {
+                    // type: 'area',
+                    name:    'Failed hits',
+                    data:    series[5],
+                    visible: false,
+                    yAxis:   1
+                },
+                */
+                {
+                    // type: 'area',
+                    name: 'Average connect time, sec.',
+                    data:  series[3],
+                    yAxis: 0
+                },
+                {
+                    // type: 'area',
+                    name: 'Average total time, sec.',
+                    data:  series[1],
+                    yAxis: 0
+                },
+                {
+                    // type:  'area',
+                    name:  'Max connect time, sec.',
+                    data:  series[2],
+                    yAxis: 0
+                },
+                {
+                    type:  'area',
+                    name:  'Max total time, sec.',
+                    data:  series[0],
+                    yAxis: 0
+                }
             ];
+            service = 'grouped-' + service;
 
             break; // case 'details'
     }
@@ -253,8 +267,8 @@ function buildChart(data)
                         y2: 1
                     },
                     stops: [
-                        [0, Highcharts.getOptions().colors[5]],
-                        [1, Highcharts.Color(Highcharts.getOptions().colors[5]).setOpacity(0).get('rgba')]
+                        [0, Highcharts.getOptions().colors[0]],
+                        [1, Highcharts.Color(Highcharts.getOptions().colors[0]).setOpacity(0).get('rgba')]
                     ]
                 },
                 marker: {
