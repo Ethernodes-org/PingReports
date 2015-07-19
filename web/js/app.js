@@ -105,16 +105,16 @@ function buildChart(data)
             };
             _series = [
                 {
-                    type:  'area',
-                    name:  'Total time, sec.',
-                    // color: '#000',
-                    data:  series[1]
-                },
-                {
                     // type: 'area',
                     name: 'Connect time, sec.',
                     data:  series[0]
                 },
+                {
+                    type:  'area',
+                    name:  'Total time, sec.',
+                    // color: '#000',
+                    data:  series[1]
+                }
             ];
 
             view += ' (last 24 hours)';
