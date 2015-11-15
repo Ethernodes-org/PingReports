@@ -141,7 +141,7 @@ switch ($view) {
                     echo sprintf(
                         "[%d,%d,%d,%d,%s]%s\n",
                         date('Y', $timeFrom),
-                        date('m', $timeFrom),
+                        date('m', $timeFrom) - 1,
                         $day,
                         $hour,
                         implode(',', $rows[$dateHour]),
@@ -163,6 +163,7 @@ switch ($view) {
     case 'details':
         $start = 0;
         $limit = 500;
+        $first = TRUE;
         do {
             $records = $dal->get(
                 'details' == $view
@@ -217,22 +218,23 @@ switch ($view) {
                 echo
                     'details' == $view
                         ? sprintf(
-                            "[%d,%d,%d,%d,%d,%d,\"%s\",%.3f,%.3f]%s\n",
+                            "%s[%d,%d,%d,%d,%d,%d,\"%s\",%.3f,%.3f]\n",
+                            $first ? '' : ',',
                             date('Y', $time),
-                            date('m', $time),
+                            date('m', $time) - 1,
                             date('d', $time),
                             date('H', $time),
                             date('i', $time),
                             date('s', $time),
                             $record['status'],
                             $record['connect_time'],
-                            $record['total_time'],
-                            ($index + 1) < $qty ? ',' : ''
+                            $record['total_time']
                         )
                         : sprintf(
-                            "[%d,%d,%d,%d,%.3f,%.3f,%.3f,%.3f,%d,%d]%s\n",
+                            "%s[%d,%d,%d,%d,%.3f,%.3f,%.3f,%.3f,%d,%d]\n",
+                            $first ? '' : ',',
                             date('Y', $time),
-                            date('m', $time),
+                            date('m', $time) - 1,
                             date('d', $time),
                             date('H', $time),
                             // date('i', $time),
@@ -242,9 +244,9 @@ switch ($view) {
                             $record['connect_time_max'],
                             $record['connect_time_avg'],
                             $record['total'],
-                            $record['failed'],
-                            ($index + 1) < $qty ? ',' : ''
+                            $record['failed']
                         );
+                $first = FALSE;
             }
             flush();
 

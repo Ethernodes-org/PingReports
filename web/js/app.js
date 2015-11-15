@@ -122,7 +122,7 @@ function buildChart(data)
             break; // case 'details'
 
         case 'grouped-details':
-            console.log('maxTime', maxTime);///
+            // console.log('maxTime', maxTime);///
             // console.log('maxHits', maxHits);///
             _yAxis = [
                 { // left y axis
